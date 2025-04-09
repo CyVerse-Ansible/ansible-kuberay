@@ -1,0 +1,36 @@
+---
+# helm is required for installation
+- name: COMMAND; check if helm is installed
+  command: which helm
+  changed_when: false
+  failed_when: false
+  register: helm_installed
+
+- name: FAIL; return fail if helm is not installed
+  fail:
+    msg: "Helm is not installed, install first"
+  when: helm_installed.rc
+
+# install the ray operator
+- name: HELM_REPOSITORY; add kuberay repository
+  kubernetes.core.helm_repository:
+    name: kuberay
+    repo_url: https://ray-project.github.io/kuberay-helm/
+
+- name: HELM; deploy the kuberay operator  
+  kubernetes.core.helm:
+    name: kuberay-operator
+    chart_ref: kuberay/kuberay-operator
+    release_namespace: "{{ KUBERAY_OPERATOR_NAMESPACE }}"
+    create_namespace: true
+    chart_version: "{{ KUBERAY_OPERATOR_CHART_VERSION }}"
+
+# install the ray cluster
+- name: HELM; deploy ray cluster
+  kubernetes.core.helm:
+    name: raycluster
+    chart_ref: kuberay/ray-cluster
+    release_namespace: "{{ RAY_CLUSTER_NAMESPACE }}"
+    create_namespace: true
+    chart_version: "{{ RAY_CLUSTER_CHART_VERSION }}"
+

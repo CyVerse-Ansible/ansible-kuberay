@@ -1,0 +1,5 @@
+- name: PLAYBOOK; setup controller nodes
+  hosts: ray_controllers
+  tasks:
+    - ansible.builtin.include_role:
+        name: cyverse-ansible.ansible-kuberay
